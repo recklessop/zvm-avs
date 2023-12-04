@@ -51,18 +51,39 @@ foreach ($cluster in $clusterTable) {
 $selectedNumber = Read-Host "Enter the number of the AVS cluster you want to work with"
 $selectedCluster = $clusters[$selectedNumber - 1]
 
-# Create an Azure App Registration
-$app = New-AzADApplication -DisplayName "YourAppName"
+# App Registration
+$appName = "ZertoZVMApp"
+$app = New-AzADApplication -DisplayName $appName -IdentifierUris "http://$appName"
+if ($null -eq $app) {
+    Write-Error "Failed to create Azure AD Application."
+    exit
+}
+Write-Host "Application ID: $($app.ApplicationId)"
+Write-Host "Object ID: $($app.ObjectId)"
+
+# Create a service principal for the app registration
 $servicePrincipal = New-AzADServicePrincipal -ApplicationId $app.ApplicationId
+if ($null -eq $servicePrincipal) {
+    Write-Error "Failed to create service principal."
+    exit
+}
 
 # Create a client secret
 $endDate = (Get-Date).AddYears(1)
 $secret = New-AzADAppCredential -ObjectId $app.ObjectId -EndDate $endDate
 $secretValue = $secret.SecretText
+if ($null -eq $secretValue) {
+    Write-Error "Failed to create client secret."
+    exit
+}
 
 # Assign Contributor role to the App registration
 $subscriptionId = (Get-AzContext).Subscription.Id
-New-AzRoleAssignment -ObjectId $servicePrincipal.Id -RoleDefinitionName "Contributor" -Scope "/subscriptions/$subscriptionId"
+$roleAssignment = New-AzRoleAssignment -ObjectId $servicePrincipal.Id -RoleDefinitionName "Contributor" -Scope "/subscriptions/$subscriptionId"
+if ($null -eq $roleAssignment) {
+    Write-Error "Failed to assign Contributor role."
+    exit
+}
 
 # Output details
 $tenantId = (Get-AzContext).Tenant.Id

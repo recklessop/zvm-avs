@@ -53,7 +53,7 @@ $selectedCluster = $clusters[$selectedNumber - 1]
 
 # App Registration
 $appName = "ZertoZVMApp"
-$app = New-AzADApplication -DisplayName $appName -IdentifierUris "http://$appName"
+$app = New-AzADApplication -DisplayName $appName
 if ($null -eq $app) {
     Write-Error "Failed to create Azure AD Application."
     exit

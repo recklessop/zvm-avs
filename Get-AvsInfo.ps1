@@ -59,8 +59,6 @@ Write-Host "Creating Azure AD App Registration: $appName"
 
 $app = New-AzADApplication -DisplayName $appName
 
-Write-Host $app
-
 Write-Host "Waiting for Process to finish up..."
 Start-Sleep -Seconds 5
 

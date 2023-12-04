@@ -53,49 +53,62 @@ $selectedCluster = $clusters[$selectedNumber - 1]
 
 # App Registration
 $appName = "ZertoZVMApp"
+$selectedNumber = Read-Host "Enter the number of the AVS cluster you want to work with"
+
+Write-Host "Creating Azure AD App Registration: $appName"
+
 $app = New-AzADApplication -DisplayName $appName
+
+Write-Host $app
+
+Write-Host "Waiting for Process to finish up..."
+Start-Sleep -Seconds 5
+
+Write-Host "Trying to get Azure AD App ... "
+
+$app = Get-AzADApplication -DisplayName $appName
 if ($null -eq $app) {
     Write-Error "Failed to create Azure AD Application."
     exit
 }
-Write-Host "Application ID: $($app.ApplicationId)"
-Write-Host "Object ID: $($app.ObjectId)"
 
-Start-Sleep -Seconds 30
-Write-Host "Waiting for Process to finish up..."
+Write-Host "Application ID: $($app.AppId)"
 
 # Create a service principal for the app registration
-$servicePrincipal = New-AzADServicePrincipal -ApplicationId $app.ApplicationId
+Write-Host "Creating a Service Principal for $appName"
+
+$servicePrincipal = New-AzADServicePrincipal -ApplicationId $app.AppId
 if ($null -eq $servicePrincipal) {
     Write-Error "Failed to create service principal."
     exit
 }
 
-Start-Sleep -Seconds 30
 Write-Host "Waiting for Process to finish up..."
+Start-Sleep -Seconds 5
 
 # Create a client secret
+Write-Host "Creating Client Secret for $appName"
+
 $endDate = (Get-Date).AddYears(1)
-$secret = New-AzADAppCredential -ObjectId $app.ObjectId -EndDate $endDate
+$secret = New-AzADAppCredential -ObjectId $app.Id -EndDate $endDate
 $secretValue = $secret.SecretText
 if ($null -eq $secretValue) {
     Write-Error "Failed to create client secret."
     exit
 }
 
-Start-Sleep -Seconds 30
 Write-Host "Waiting for Process to finish up..."
+Start-Sleep -Seconds 5
 
 # Assign Contributor role to the App registration
+Write-Host "Assigning Subscription Contributor Role to $appName"
+
 $subscriptionId = (Get-AzContext).Subscription.Id
 $roleAssignment = New-AzRoleAssignment -ObjectId $servicePrincipal.Id -RoleDefinitionName "Contributor" -Scope "/subscriptions/$subscriptionId"
 if ($null -eq $roleAssignment) {
     Write-Error "Failed to assign Contributor role."
     exit
 }
-
-Start-Sleep -Seconds 30
-Write-Host "Waiting for Process to finish up..."
 
 # Output details
 $tenantId = (Get-AzContext).Tenant.Id

@@ -61,12 +61,18 @@ if ($null -eq $app) {
 Write-Host "Application ID: $($app.ApplicationId)"
 Write-Host "Object ID: $($app.ObjectId)"
 
+Start-Sleep -Seconds 30
+Write-Host "Waiting for Process to finish up..."
+
 # Create a service principal for the app registration
 $servicePrincipal = New-AzADServicePrincipal -ApplicationId $app.ApplicationId
 if ($null -eq $servicePrincipal) {
     Write-Error "Failed to create service principal."
     exit
 }
+
+Start-Sleep -Seconds 30
+Write-Host "Waiting for Process to finish up..."
 
 # Create a client secret
 $endDate = (Get-Date).AddYears(1)
@@ -77,6 +83,9 @@ if ($null -eq $secretValue) {
     exit
 }
 
+Start-Sleep -Seconds 30
+Write-Host "Waiting for Process to finish up..."
+
 # Assign Contributor role to the App registration
 $subscriptionId = (Get-AzContext).Subscription.Id
 $roleAssignment = New-AzRoleAssignment -ObjectId $servicePrincipal.Id -RoleDefinitionName "Contributor" -Scope "/subscriptions/$subscriptionId"
@@ -84,6 +93,9 @@ if ($null -eq $roleAssignment) {
     Write-Error "Failed to assign Contributor role."
     exit
 }
+
+Start-Sleep -Seconds 30
+Write-Host "Waiting for Process to finish up..."
 
 # Output details
 $tenantId = (Get-AzContext).Tenant.Id

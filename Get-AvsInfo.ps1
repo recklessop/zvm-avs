@@ -1,16 +1,24 @@
-# Function to check and install Az.VMware module
-function Ensure-AzVMwareModule {
-    $moduleName = "Az.VMware"
+# Function to check and install a PowerShell module
+function Ensure-ModuleInstalled {
+    param (
+        [string]$moduleName,
+        [switch]$forceInstall
+    )
+    
     $module = Get-Module -ListAvailable -Name $moduleName
 
-    if ($null -eq $module) {
-        Write-Host "Module $moduleName is not installed. Installing now..."
+    if ($null -eq $module -or $forceInstall) {
+        Write-Host "Module $moduleName is not installed or force install is requested. Installing now..."
         Install-Module -Name $moduleName -Force -AllowClobber -Scope CurrentUser
         Import-Module $moduleName
     } else {
         Write-Host "Module $moduleName is already installed."
     }
 }
+
+# Check and ensure required modules are installed
+Ensure-ModuleInstalled -moduleName "Az"
+Ensure-ModuleInstalled -moduleName "Az.VMware"
 
 # Function to check if the user is logged in to Azure
 function Check-AzureLogin {
@@ -25,9 +33,6 @@ function Check-AzureLogin {
         Connect-AzAccount
     }
 }
-
-# Ensure the required module is installed
-Ensure-AzVMwareModule
 
 # Check if the user is logged into Azure
 Check-AzureLogin
@@ -47,11 +52,11 @@ $selectedNumber = Read-Host "Enter the number of the AVS cluster you want to wor
 $selectedCluster = $clusters[$selectedNumber - 1]
 
 # Create an Azure App Registration
-$app = New-AzADApplication -DisplayName “ZertoZVMApp”
+$app = New-AzADApplication -DisplayName "YourAppName"
 $servicePrincipal = New-AzADServicePrincipal -ApplicationId $app.ApplicationId
 
 # Create a client secret
-$endDate = (Get-Date).AddYears(2)
+$endDate = (Get-Date).AddYears(1)
 $secret = New-AzADAppCredential -ObjectId $app.ObjectId -EndDate $endDate
 $secretValue = $secret.SecretText
 

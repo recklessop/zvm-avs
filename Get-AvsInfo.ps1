@@ -53,7 +53,6 @@ $selectedCluster = $clusters[$selectedNumber - 1]
 
 # App Registration
 $appName = "ZertoZVMApp"
-$selectedNumber = Read-Host "Enter the number of the AVS cluster you want to work with"
 
 Write-Host "Creating Azure AD App Registration: $appName"
 
